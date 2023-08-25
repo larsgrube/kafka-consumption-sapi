@@ -1,0 +1,22 @@
+#%RAML 1.0 DataType
+type: array
+items:
+  properties:
+    topicName:
+      type: string
+      maxLength: 128
+    messageKey:
+      type: string
+      maxLength: 128
+    messagePublishedTS: datetime
+    topicPartition:
+      type: integer
+      minimum: 0
+      maximum: 65535
+    topicPartitionOffset:
+      type: integer
+      minimum: 0
+      maximum: 4294967295
+    errorMessage:
+      type: string
+      maxLength: 256
