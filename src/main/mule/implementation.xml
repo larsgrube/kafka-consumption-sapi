@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<sub-flow name="put-orders" doc:id="a4f498f8-0576-48de-a692-c6dd4800757c" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="ae65a6e0-514a-41a5-9d4f-e98213594422">
+            <route>
+                <ee:transform doc:name="Transform Message" doc:id="d12bf22d-ba9d-4c09-8717-65be51c11797">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload map (orderItem) -> {
+	orderId: orderItem.orderId,
+	orderCreatedTS: (orderItem.orderCreatedTS >> "CET") as LocalDateTime,
+	customerEMailAddress: orderItem.customerEMailAddress,
+	orderState: orderItem.orderState,
+	orderUpdatedTS: ((orderItem.orderUpdatedTS >> "CET") as LocalDateTime) default null,
+	muleCorrelationId: correlationId
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <logger level="INFO" doc:name="Logger" doc:id="46f52e79-6f88-4a64-a124-4999b1d0a2bc" message="Number of orders: #[sizeOf(payload)]"/>
+				<db:bulk-insert doc:name="Bulk insert" doc:id="7efd3088-1e57-4367-aad9-f331e1601bae" config-ref="Database_Config">
+                    <db:sql><![CDATA[INSERT INTO order_headers
+(
+  orderId,
+  orderCreatedTS,
+  customerEMailAddress,
+  orderState,
+  orderUpdatedTS,
+  muleCorrelationId
+)
+VALUES
+(
+  :orderId,
+  :orderCreatedTS,
+  :customerEMailAddress,
+  :orderState,
+  :orderUpdatedTS,
+  :muleCorrelationId
+)
+;]]></db:sql>
+                </db:bulk-insert>
+            </route>
+            <route>
+                <ee:transform doc:name="Transform Message" doc:id="7667e88c-131e-4f16-a3d2-0b6f50f67c5f">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload flatMap (orderItem) -> orderItem.positions map (orderPosItem) -> {
+	orderId: orderItem.orderId,
+	positionId: orderPosItem.positionId,
+	itemId: orderPosItem.itemId,
+	quantity: orderPosItem.quantity,
+	muleCorrelationId: correlationId
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <logger level="INFO" doc:name="Logger" doc:id="da405bcc-7d38-4de1-ab1a-360cad92246a" message="Number of order positions: #[sizeOf(payload)]"/>
+				<db:bulk-insert doc:name="Bulk insert" doc:id="7bc04ba2-1835-41d1-a8a6-f8428c4a5454" config-ref="Database_Config">
+                    <db:sql><![CDATA[INSERT INTO order_positions
+(
+  orderId,
+  positionId,
+  itemId,
+  quantity,
+  muleCorrelationId
+)
+VALUES
+(
+  :orderId,
+  :positionId,
+  :itemId,
+  :quantity,
+  :muleCorrelationId
+)
+;]]></db:sql>
+                </db:bulk-insert>
+            </route>
+        </scatter-gather>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"Order request accepted."]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+	</sub-flow>
+</mule>
