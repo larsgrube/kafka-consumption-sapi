@@ -128,4 +128,52 @@ output application/json
             </ee:message>
         </ee:transform>
 	</sub-flow>
+	<sub-flow name="put-failed-messages" doc:id="b96d1939-1573-49ef-9b0c-4ed6e1b0b9c1" >
+		<ee:transform doc:name="Transform Message" doc:id="ed1b2ed7-5b64-4d32-9a43-26e8ba3ebcb9">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload map (item) -> {
+	messageKey: item.messageKey,
+	topicPartition: item.topicPartition,
+	topicPartitionOffset: item.topicPartitionOffset,
+	errorMessage: item.errorMessage,
+	topicName: item.topicName,
+	messagePublishedTS: (item.messagePublishedTS >> "CET") as LocalDateTime,
+	muleCorrelationId: correlationId
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="e1990746-0858-457c-96c9-bcece654761f" config-ref="Database_Config">
+            <db:sql><![CDATA[INSERT INTO failed_messages
+(
+  messageKey,
+  topicPartition,
+  topicPartitionOffset,
+  errorMessage,
+  topicName,
+  messagePublishedTS,
+  muleCorrelationId
+)
+VALUES
+(
+  :messageKey,
+  :topicPartition,
+  :topicPartitionOffset,
+  :errorMessage,
+  :topicName,
+  :messagePublishedTS,
+  :muleCorrelationId
+);]]></db:sql>
+        </db:bulk-insert>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"Failed messages logged."]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+	</sub-flow>
 </mule>

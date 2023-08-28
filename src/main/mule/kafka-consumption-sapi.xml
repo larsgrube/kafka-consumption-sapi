@@ -18,10 +18,10 @@
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Bad request"}]]></ee:set-payload>
+{message: error.description}]]></ee:set-payload>
                     </ee:message>
                     <ee:variables>
-                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
@@ -90,6 +90,16 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bd543dfb-beea-489e-8fea-1aea6a3fd84e" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="2e2cc508-f9f3-4a07-9b08-a15e4c206075" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: error.description}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
         </error-handler>
     </flow>
     <flow name="kafka-consumption-sapi-console">
@@ -123,14 +133,7 @@ output application/json
 		<flow-ref doc:name="put-orders-cancellations" doc:id="23518379-b4e1-4dea-9d6f-3061cdfeab35" name="put-orders-cancellations"/>
     </flow>
     <flow name="put:\failedMessages:application\json:kafka-consumption-sapi-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-"Failed messages logged."]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<flow-ref doc:name="put-failed-messages" doc:id="20ed0dce-e006-4b55-9715-9bc38ecb1bd2" name="put-failed-messages"/>
     </flow>
     <flow name="put:\orders:application\json:kafka-consumption-sapi-config">
         <flow-ref doc:name="put-orders" doc:id="ec671d31-dfab-4a62-a5cc-59c4afe3275e" name="put-orders"/>

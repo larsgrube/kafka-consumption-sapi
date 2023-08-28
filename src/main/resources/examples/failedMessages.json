@@ -1,0 +1,26 @@
+[
+  {
+    "topicName": "orders",
+    "messageKey": "888-811781411",
+    "messagePublishedTS": "2007-04-18T15:24:18.623Z",
+    "topicPartition": 0,
+    "topicPartitionOffset": 123654,
+    "errorMessage": "/0/positions/0 required key [itemId] not found"
+  },
+  {
+    "topicName": "orders",
+    "messageKey": "383-518420326",
+    "messagePublishedTS": "2000-02-19T18:17:59.971Z",
+    "topicPartition": 1,
+    "topicPartitionOffset": 76534,
+    "errorMessage": "Route 1: Caught exception in Exception Strategy: java.sql.BatchUpdateException: Data truncation: Out of range value for column 'itemId' at row 1"
+  },
+  {
+    "topicName": "orders",
+    "messageKey": "176-800335595",
+    "messagePublishedTS": "2003-02-01T08:41:16.778Z",
+    "topicPartition": 2,
+    "topicPartitionOffset": 6823,
+    "errorMessage": "/665/positions/3/positionId 134534254 is not less or equal to 65535"
+  }
+]
