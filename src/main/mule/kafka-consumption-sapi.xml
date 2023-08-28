@@ -120,14 +120,7 @@ output application/json
         </error-handler>
     </flow>
     <flow name="put:\orders\cancellations:application\json:kafka-consumption-sapi-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-"Cancellation request accepted."]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<flow-ref doc:name="put-orders-cancellations" doc:id="23518379-b4e1-4dea-9d6f-3061cdfeab35" name="put-orders-cancellations"/>
     </flow>
     <flow name="put:\failedMessages:application\json:kafka-consumption-sapi-config">
         <ee:transform doc:name="Transform Message">
