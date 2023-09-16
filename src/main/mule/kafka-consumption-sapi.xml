@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
-http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
     <flow name="kafka-consumption-sapi-main">
         <http:listener config-ref="kafka-consumption-sapi-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -91,38 +90,38 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4a687afc-6440-405a-9c4e-e5feb9127dcd" type="DB:CONNECTIVITY">
-				<set-variable value="503" doc:name="httpStatus" doc:id="2db094e0-aec5-4796-ae4f-cbba609904f7" variableName="httpStatus"/>
-				<ee:transform doc:name="Transform Message" doc:id="f8bcca75-1be6-4cfc-934d-9d437b1fa4f1" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4a687afc-6440-405a-9c4e-e5feb9127dcd" type="DB:CONNECTIVITY">
+                <set-variable value="503" doc:name="httpStatus" doc:id="2db094e0-aec5-4796-ae4f-cbba609904f7" variableName="httpStatus" />
+                <ee:transform doc:name="Transform Message" doc:id="f8bcca75-1be6-4cfc-934d-9d437b1fa4f1">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {message: error.description}]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="fb4a1cae-1d95-4d6f-ac0c-7a79aca452a9" type="MULE:COMPOSITE_ROUTING" when='#[(error.errors ++ (flatten(error.errors.*errors) default [])).*errorType.*asString contains "DB:CONNECTIVITY"]'>
-				<set-variable value="503" doc:name="httpStatus" doc:id="a2f984aa-e505-4cd0-b4f2-f5f34394c23b" variableName="httpStatus"/>
-				<ee:transform doc:name="Transform Message" doc:id="4a03c053-2038-4df8-9978-deb0a027df34" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="fb4a1cae-1d95-4d6f-ac0c-7a79aca452a9" type="MULE:COMPOSITE_ROUTING" when="#[(error.errors ++ (flatten(error.errors.*errors) default [])).*errorType.*asString contains &quot;DB:CONNECTIVITY&quot;]">
+                <set-variable value="503" doc:name="httpStatus" doc:id="a2f984aa-e505-4cd0-b4f2-f5f34394c23b" variableName="httpStatus" />
+                <ee:transform doc:name="Transform Message" doc:id="4a03c053-2038-4df8-9978-deb0a027df34">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {message: error.description}]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bd543dfb-beea-489e-8fea-1aea6a3fd84e" type="ANY">
-				<ee:transform doc:name="Transform Message" doc:id="2e2cc508-f9f3-4a07-9b08-a15e4c206075" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bd543dfb-beea-489e-8fea-1aea6a3fd84e" type="ANY">
+                <ee:transform doc:name="Transform Message" doc:id="2e2cc508-f9f3-4a07-9b08-a15e4c206075">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {message: error.description}]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-			</on-error-propagate>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
         </error-handler>
     </flow>
     <flow name="kafka-consumption-sapi-console">
@@ -153,12 +152,12 @@ output application/json
         </error-handler>
     </flow>
     <flow name="put:\orders\cancellations:application\json:kafka-consumption-sapi-config">
-		<flow-ref doc:name="put-orders-cancellations" doc:id="23518379-b4e1-4dea-9d6f-3061cdfeab35" name="put-orders-cancellations"/>
+        <flow-ref doc:name="put-orders-cancellations" doc:id="23518379-b4e1-4dea-9d6f-3061cdfeab35" name="put-orders-cancellations" />
     </flow>
     <flow name="put:\failedMessages:application\json:kafka-consumption-sapi-config">
-		<flow-ref doc:name="put-failed-messages" doc:id="20ed0dce-e006-4b55-9715-9bc38ecb1bd2" name="put-failed-messages"/>
+        <flow-ref doc:name="put-failed-messages" doc:id="20ed0dce-e006-4b55-9715-9bc38ecb1bd2" name="put-failed-messages" />
     </flow>
     <flow name="put:\orders:application\json:kafka-consumption-sapi-config">
-		<flow-ref doc:name="put-orders" doc:id="ec671d31-dfab-4a62-a5cc-59c4afe3275e" name="put-orders"/>
+        <flow-ref doc:name="put-orders" doc:id="ec671d31-dfab-4a62-a5cc-59c4afe3275e" name="put-orders" />
     </flow>
 </mule>
