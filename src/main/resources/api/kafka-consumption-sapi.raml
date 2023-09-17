@@ -5,6 +5,7 @@ types:
   orders: !include types/orders.raml
   orderCancellations: !include types/orderCancellations.raml
   failedMessages: !include types/failedMessages.raml
+  correlationIdLog: !include types/correlationIdLog.raml
 
 /orders:
   put:
@@ -45,3 +46,22 @@ types:
           application/json:
             examples:
               message: Failed messages logged.
+/correlationId/{correlationId}:
+  uriParameters:
+    correlationId:
+      type: string
+      maxLength: 50
+      example: "76fd931b-a5dc-47d7-8a73-dc84469fd95a"
+  put:
+    displayName: Log correlation id
+    body:
+      application/json:
+        type: correlationIdLog
+        example: !include examples/correlationIdLog.json
+    responses:
+      200:
+        body:
+          application/json:
+            examples:
+              message: CorrelationId logged.
+

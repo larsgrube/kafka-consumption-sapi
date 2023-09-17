@@ -160,4 +160,7 @@ output application/json
     <flow name="put:\orders:application\json:kafka-consumption-sapi-config">
         <flow-ref doc:name="put-orders" doc:id="ec671d31-dfab-4a62-a5cc-59c4afe3275e" name="put-orders" />
     </flow>
+    <flow name="put:\correlationId\(correlationId):application\json:kafka-consumption-sapi-config">
+		<flow-ref doc:name="put-correlation-id" doc:id="7b48129c-040d-4a75-b09b-40db9906f3dc" name="put-correlation-id" />
+    </flow>
 </mule>

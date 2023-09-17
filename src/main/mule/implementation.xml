@@ -5,6 +5,37 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<sub-flow name="put-correlation-id" doc:id="a431c498-294e-4573-a3ac-f6991bc9c867" >
+		<ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="correlationId">attributes.uriParams.'correlationId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<db:insert doc:name="Insert" doc:id="3619ac3c-afe7-4cf2-89b0-662699c604d5" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO correlationid_log
+(
+  topicName,
+  muleCorrelationId
+)
+VALUES
+(
+  :topicName,
+  :muleCorrelationId
+);]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	topicName: payload.topicName,
+	muleCorrelationId: vars.correlationId
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"CorrelationId logged."]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+	</sub-flow>
 	<sub-flow name="put-orders" doc:id="a4f498f8-0576-48de-a692-c6dd4800757c" >
 		<scatter-gather doc:name="Scatter-Gather" doc:id="ae65a6e0-514a-41a5-9d4f-e98213594422">
             <route>
